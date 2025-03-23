@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polaris</title>
+    <link rel="stylesheet" href="style3.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">Polaris</div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="culture.html">Itinerary</a></li>
+                <li><a href="index2.html">Booking</a></li>
+                <li><a href="about.html">About us</a></li>
+                <li><a href="#">Login / Sign Up</a></li>
+            </ul>
+            <div class="menu-icon" id="menuIcon">&#9776;</div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="map-route-container">
+            <div class="map-box">
+                <h2>MAP</h2>
+                <div id="map"></div>
+            </div>
+            <div class="route-info">
+                <h2>ROUTE DETAILS</h2>
+                <div class="input-group-container">
+                    <div class="input-group">
+                        <label for="fromInput">FROM</label>
+                        <input type="text" id="fromInput" placeholder="Enter starting location">
+                    </div>
+                    <div class="input-group">
+                        <label for="toInput">TO</label>
+                        <input type="text" id="toInput" placeholder="Enter destination">
+                    </div>
+                    <hr>
+                </div>
+                <p class="distance"><strong>TOTAL DISTANCE - <span id="distanceValue">0</span> Km</strong></p>
+                <div class="eta">
+                    <p><strong>ETA - <span id="etaValue">0</span></p>
+                </div>
+                <div class="cta">
+                    <button id="stepsButton">STEPS TO REACH ▼</button>
+                </div>
+                <div id="stepsList" class="steps-list">
+                    <ol id="routeSteps">
+                        <!-- Steps will be dynamically inserted here -->
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script3.js"></script>
+</body>
+</html>
