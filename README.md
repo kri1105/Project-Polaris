@@ -50,7 +50,7 @@ Images:
 
 
 <h3>Acknowledgement:</h3>
-Team Members
+<h4>Team Members</h4>
 1. Frontend and Design - Samaira, Praveen pr, Garima ola
 2. Backend and Testing - Janmeyjay singhayush, Krithi S J, Nischit etha 
 
