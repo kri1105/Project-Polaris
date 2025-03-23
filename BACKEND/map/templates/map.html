@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Polaris Routing</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      #map {
+        height: 500px;
+        margin-top: 20px;
+        border: 1px solid #ddd;
+      }
+      .results {
+        margin-top: 20px;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+      }
+      .error {
+        color: red;
+      }
+    </style>
+    <!-- Leaflet CSS and JS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="my-4">Polaris Routing</h1>
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title">Find Your Route</h2>
+          <form id="routeForm">
+            <div class="form-group">
+              <label for="start">Start Location:</label>
+              <input
+                type="text"
+                id="start"
+                name="start"
+                class="form-control"
+                placeholder="Enter start location"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="end">Destination:</label>
+              <input
+                type="text"
+                id="end"
+                name="end"
+                class="form-control"
+                placeholder="Enter destination"
+                required
+              />
+            </div>
+            <button type="submit" class="btn btn-primary">Get Route</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Map Container -->
+      <div id="map" class="my-4"></div>
+
+      <!-- Route Results -->
+      <div class="results" id="routeResults">
+        <!-- Route details will be displayed here -->
+      </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+      // Initialize the map
+      const map = L.map("map").setView([20.5937, 78.9629], 5); // Default center: India
+
+      // Add OpenStreetMap tiles
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+      }).addTo(map);
+
+      // Function to draw the route on the map
+      function drawRoute(route) {
+        // Clear previous route (if any)
+        if (window.routeLayer) {
+          map.removeLayer(window.routeLayer);
+        }
+
+        // Convert route points to LatLng objects
+        const routePoints = route.points.coordinates.map((coord) =>
+          L.latLng(coord[1], coord[0])
+        );
+
+        // Draw the route on the map
+        window.routeLayer = L.polyline(routePoints, { color: "blue" }).addTo(
+          map
+        );
+
+        // Fit the map to the route bounds
+        map.fitBounds(window.routeLayer.getBounds());
+      }
+
+      // Handle form submission
+      document
+        .getElementById("routeForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault(); // Prevent form submission
+
+          // Get user inputs
+          const start = document.getElementById("start").value;
+          const end = document.getElementById("end").value;
+
+          // Fetch route data from Django backend
+          fetch(
+            `/api/map/route/?start=${encodeURIComponent(
+              start
+            )}&end=${encodeURIComponent(end)}`
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              const resultsDiv = document.getElementById("routeResults");
+              resultsDiv.innerHTML = ""; // Clear previous results
+
+              if (data.error) {
+                // Display error message
+                resultsDiv.innerHTML = `<p class="error">Error: ${data.error}</p>`;
+                return;
+              }
+
+              // Display route details
+              resultsDiv.innerHTML = `
+                        <h3>Route Details</h3>
+                        <p><strong>From:</strong> ${data.start_address}</p>
+                        <p><strong>To:</strong> ${data.end_address}</p>
+                        <p><strong>Distance:</strong> ${(
+                          data.distance / 1000
+                        ).toFixed(1)} km</p>
+                        <p><strong>Estimated Time:</strong> ${Math.floor(
+                          data.time / 3600
+                        )}h ${Math.floor((data.time % 3600) / 60)}m</p>
+                        <h4>Instructions:</h4>
+                        <ol>
+                            ${data.instructions
+                              .map(
+                                (i) => `
+                                <li>${i.text} (${(i.distance / 1000).toFixed(
+                                  1
+                                )} km)</li>
+                            `
+                              )
+                              .join("")}
+                        </ol>
+                    `;
+
+              // Draw the route on the map
+              drawRoute(data.paths[0]);
+            })
+            .catch((error) => {
+              // Handle fetch errors
+              const resultsDiv = document.getElementById("routeResults");
+              resultsDiv.innerHTML = `<p class="error">Failed to fetch route: ${error.message}</p>`;
+            });
+        });
+    </script>
+  </body>
+</html>
